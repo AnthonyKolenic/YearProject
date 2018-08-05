@@ -36,6 +36,7 @@ namespace YearProject
             DisplayArea.Text += "\r\n";
             extractionThread = new BackgroundWorker();
             extractionThread.WorkerReportsProgress = true;
+            extractionThread.WorkerSupportsCancellation = true;
             extractionThread.DoWork += new DoWorkEventHandler(Extractor_DoWork);
             extractionThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Extractor_RunWorkerCompleted);
             extractionThread.ProgressChanged += new ProgressChangedEventHandler(Extractor_ProgressChanged);
@@ -117,7 +118,14 @@ namespace YearProject
 
         private void CancelExtraction_Click(object sender, RoutedEventArgs e)
         {
-            extractionThread.CancelAsync();
+            String dialogText = "Are you sure you want to cancel the current feature extraction?";
+            MessageBoxResult res = MessageBox.Show(dialogText, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            //if cancel selected stop processing and close window
+            if (res == MessageBoxResult.Yes)
+            {
+                extractionThread.CancelAsync();
+            }
+            
         }
     }
 }
