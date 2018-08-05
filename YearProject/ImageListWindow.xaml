@@ -1,0 +1,35 @@
+﻿<Window x:Class="YearProject.ImageListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YearProject"
+        mc:Ignorable="d"
+        Closing="Window_Closing"
+        Title="ImageListWindow" Height="283.666" Width="608.731"
+        >
+    <Grid>
+        <DockPanel>
+            <ListView x:Name="NameList"  Width="250" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionMode="Extended" MouseDoubleClick="Item_Clicked">
+
+                <ListView.View>
+
+                    <GridView AllowsColumnReorder="False">
+                        <GridViewColumn/>
+                    </GridView>
+                </ListView.View>
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Add Images" Click="AddItems_Clicked"/>
+                        <MenuItem Header="Remove Images" Click="RemoveItems_Clicked"/>
+
+                    </ContextMenu>
+                </ListView.ContextMenu>
+            </ListView>
+            <Image x:Name="imgDisplay"/>
+
+
+        </DockPanel>
+
+    </Grid>
+</Window>
