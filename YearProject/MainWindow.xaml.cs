@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Emgu.CV.Util;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace YearProject
     {
         ImageListWindow imageList ;
         List<String> inputImageFilenames = new List<string>();
+        bool featuresExtractValid = true;
+        Dictionary<String, VectorOfKeyPoint> keypoints;
 
         public MainWindow()
         {
@@ -34,7 +37,15 @@ namespace YearProject
         public void UpdateImageList(IEnumerable<String> items)
         {
             inputImageFilenames.Clear();
+            featuresExtractValid = false;
             inputImageFilenames.AddRange(items);
+        }
+
+        public void UodateFeatureExtractList(Dictionary<String, VectorOfKeyPoint> keypoints)
+        {
+            featuresExtractValid = true;
+            this.keypoints = keypoints;
+            System.Console.WriteLine("Wooh");
         }
 
         private void ImageList_Clicked(object sender, RoutedEventArgs e)
@@ -47,15 +58,27 @@ namespace YearProject
             int numFiles = inputImageFilenames.Count;
             if (numFiles > 0)
             {
-                String dialogText = "Are you sure you want to extract features from " + numFiles + " image(s), this could take a long time?";
-                MessageBoxResult res = MessageBox.Show(dialogText, "Confirmation", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-                if (res == MessageBoxResult.OK)
+                bool execute = true;
+                if (featuresExtractValid)
                 {
-                    FeatureExtractionWindow extractWindow = new FeatureExtractionWindow(inputImageFilenames);
-                    extractWindow.ShowDialog();
+                    if (MessageBox.Show("Keypoints are still valid, are you sure you want to update them?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+                    {
+                        execute = false;
 
+                    }
                 }
-            }
+                if (execute)
+                {
+                    String dialogText = "Are you sure you want to extract features from " + numFiles + " image(s), this could take a long time?";
+                    MessageBoxResult res = MessageBox.Show(dialogText, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        FeatureExtractionWindow extractWindow = new FeatureExtractionWindow(inputImageFilenames, this);
+                        extractWindow.ShowDialog();
+
+                    }
+                }
+            } 
             else
             {
                 MessageBox.Show("No files selected for processing, add files using File->Image List", "Information", MessageBoxButton.OK, MessageBoxImage.Information);

@@ -28,8 +28,9 @@ namespace YearProject
     {
         private BackgroundWorker extractionThread;
         private List<String> Filenames = new List<string>();
+        private MainWindow mainReference;
 
-        public FeatureExtractionWindow(IEnumerable<String> Filenames)
+        public FeatureExtractionWindow(IEnumerable<String> Filenames,MainWindow caller)
         {
             InitializeComponent();
             this.Filenames.AddRange(Filenames);
@@ -42,7 +43,7 @@ namespace YearProject
             extractionThread.ProgressChanged += new ProgressChangedEventHandler(Extractor_ProgressChanged);
 
             extractionThread.RunWorkerAsync(Filenames);
-
+            mainReference = caller;
         }
 
         private void Extractor_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -54,9 +55,10 @@ namespace YearProject
             }
             else if (e.Cancelled)
             {
-            }
+                }
             else
             {
+                mainReference.UodateFeatureExtractList((Dictionary<String, VectorOfKeyPoint>)e.Result);
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -68,9 +70,12 @@ namespace YearProject
             List<String> filenames = new List<String>((IEnumerable<String>)e.Argument);
             int minHessian = 300;
             BackgroundWorker worker = sender as BackgroundWorker;
+            
+            Dictionary<String, VectorOfKeyPoint> result = new Dictionary<string, VectorOfKeyPoint>();
             for (int i = 0; i < filenames.Count<String>(); i++)
             {
                 String filename = filenames[i];
+                
                 //if cancel button pressed, cancel task
                 if (worker.CancellationPending)
                 {
@@ -98,14 +103,15 @@ namespace YearProject
                     }
                     //-----------------process file-----------------------
                     SURF detector = new SURF(minHessian);
-                    VectorOfKeyPoint keypoints = new VectorOfKeyPoint();
-                    detector.Detect(img,keypoints);
+                    VectorOfKeyPoint keyPoints = new VectorOfKeyPoint();
+                    detector.Detect(img,keyPoints);
+                    result[filename] = keyPoints;
                     //update progress showing another file has been successfully processed
                     worker.ReportProgress(i);
                     
                 }
             }
-            e.Result = "";
+            e.Result = result;
         }
 
         private void Extractor_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -113,6 +119,7 @@ namespace YearProject
             int progress = (int)(((e.ProgressPercentage + 1) / (double)Filenames.Count<String>()) * 100);
             this.ExtractionProgress.Value = progress;
             this.DisplayArea.Text += Filenames[e.ProgressPercentage] + "\r\n";
+            
             //DisplayArea.Text += filename + "\n";
         }
 
