@@ -51,14 +51,14 @@ namespace YearProject
             if (e.Error != null)
             {
                 MessageBox.Show(e.Error.Message);
-                
+
             }
             else if (e.Cancelled)
             {
-                }
+            }
             else
             {
-                mainReference.UodateFeatureExtractList((Dictionary<String, VectorOfKeyPoint>)e.Result);
+                mainReference.UpdateFeatureExtractList((Dictionary<String, VectorOfKeyPoint>)e.Result);
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -68,7 +68,7 @@ namespace YearProject
         private void Extractor_DoWork(object sender, DoWorkEventArgs e)
         {
             List<String> filenames = new List<String>((IEnumerable<String>)e.Argument);
-            int minHessian = 300;
+            int minHessian = 400;
             BackgroundWorker worker = sender as BackgroundWorker;
             
             Dictionary<String, VectorOfKeyPoint> result = new Dictionary<string, VectorOfKeyPoint>();
@@ -104,8 +104,9 @@ namespace YearProject
                     //-----------------process file-----------------------
                     SURF detector = new SURF(minHessian);
                     VectorOfKeyPoint keyPoints = new VectorOfKeyPoint();
-                    detector.Detect(img,keyPoints);
-                    result[filename] = keyPoints;
+                    detector.DetectRaw(img,keyPoints);
+                    result.Add(filename,keyPoints);
+                    System.Console.WriteLine("Sent : " +  keyPoints.Size);
                     //update progress showing another file has been successfully processed
                     worker.ReportProgress(i);
                     

@@ -1,4 +1,5 @@
-﻿using Emgu.CV.Util;
+﻿using Emgu.CV.Structure;
+using Emgu.CV.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,11 +42,48 @@ namespace YearProject
             inputImageFilenames.AddRange(items);
         }
 
-        public void UodateFeatureExtractList(Dictionary<String, VectorOfKeyPoint> keypoints)
+        public void UpdateFeatureExtractList(Dictionary<String, VectorOfKeyPoint> keypoints)
         {
             featuresExtractValid = true;
             this.keypoints = keypoints;
-            System.Console.WriteLine("Wooh");
+            foreach (KeyValuePair<String, VectorOfKeyPoint> entry in keypoints)
+            {
+
+                System.Console.WriteLine("Received : " + entry.Value.Size);
+                lstKeypoints.Items.Add(entry.Key);
+            }
+        }
+
+        private void Item_Clicked(object sender, RoutedEventArgs e)
+        {
+            string filename = (String)lstKeypoints.SelectedItem;
+            BitmapImage canvas = new BitmapImage(new Uri(filename));
+            int width = canvas.PixelWidth;
+            int height = canvas.PixelHeight;
+
+            DrawingVisual renderer = new DrawingVisual();
+            
+            Pen pen = new Pen(new SolidColorBrush(Color.FromRgb(255,255,0)),1);
+            using (DrawingContext context = renderer.RenderOpen())
+            {
+                context.DrawImage(canvas, new Rect(0, 0, width, height));
+                int counter = 0;
+                foreach (MKeyPoint point in keypoints[filename].ToArray() )
+                {
+                    counter++;
+                    
+                    int x = (int)point.Point.X;
+                    int y = (int)point.Point.Y;
+                    System.Console.WriteLine("Dot at: ( " + x + " , " + y + " )");
+                    context.DrawRectangle(null, pen, new Rect(x - 1,y - 1, 3, 3));
+                }
+                System.Console.WriteLine("Number of Points drawn: " + counter);
+            }
+
+            RenderTargetBitmap target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+            target.Render(renderer);
+
+            imgKeyPoints.Source = target;
         }
 
         private void ImageList_Clicked(object sender, RoutedEventArgs e)

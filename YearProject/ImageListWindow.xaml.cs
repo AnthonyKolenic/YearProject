@@ -46,6 +46,7 @@ namespace YearProject
         private void Item_Clicked(object sender, RoutedEventArgs e)
         {
             imgDisplay.Source = new BitmapImage(new Uri((String)NameList.SelectedItem));
+               
         }
 
         private void AddItems_Clicked(object sender, RoutedEventArgs e)
