@@ -58,7 +58,7 @@ namespace YearProject
             }
             else
             {
-                mainReference.UpdateFeatureExtractList((Dictionary<String, VectorOfKeyPoint>)e.Result);
+                mainReference.UpdateFeatureExtractList((Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>>)e.Result);
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -68,10 +68,9 @@ namespace YearProject
         private void Extractor_DoWork(object sender, DoWorkEventArgs e)
         {
             List<String> filenames = new List<String>((IEnumerable<String>)e.Argument);
-            int minHessian = 400;
-            BackgroundWorker worker = sender as BackgroundWorker;
             
-            Dictionary<String, VectorOfKeyPoint> result = new Dictionary<string, VectorOfKeyPoint>();
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> result = new Dictionary<string, Tuple<VectorOfKeyPoint, LineSegment2D[]>>();
             for (int i = 0; i < filenames.Count<String>(); i++)
             {
                 String filename = filenames[i];
@@ -99,20 +98,56 @@ namespace YearProject
                         }
                         //if user chose to ignore, jump over filename and attempt to process the other files
                         continue;
-                       
+                        
                     }
                     //-----------------process file-----------------------
-                    SURF detector = new SURF(minHessian);
-                    VectorOfKeyPoint keyPoints = new VectorOfKeyPoint();
-                    detector.DetectRaw(img,keyPoints);
-                    result.Add(filename,keyPoints);
-                    System.Console.WriteLine("Sent : " +  keyPoints.Size);
+                    VectorOfKeyPoint keyPoints = extractKeyPoints(img);
+                    LineSegment2D[] lines = extractLines(img);
+
+                    Tuple<VectorOfKeyPoint, LineSegment2D[]> tempStruct = new Tuple<VectorOfKeyPoint, LineSegment2D[]>(keyPoints,lines);
+
+                    System.Console.WriteLine(keyPoints.Size);
+                    result.Add(filename, tempStruct);
                     //update progress showing another file has been successfully processed
                     worker.ReportProgress(i);
                     
                 }
             }
             e.Result = result;
+        }
+
+        private VectorOfKeyPoint extractKeyPoints(Mat image)
+        {
+            VectorOfKeyPoint res = new VectorOfKeyPoint();
+            int minHessian = 400;
+            SURF detector = new SURF(minHessian);
+            detector.DetectRaw(image, res);
+            System.Console.WriteLine("Sent : " + res.Size);
+            return res;
+        }
+
+        private LineSegment2D[] extractLines(Mat image)
+        {
+            LineSegment2D[] res = null;
+
+            //convert image to grey
+            UMat newImage = new UMat();
+            CvInvoke.CvtColor(image, newImage, ColorConversion.Bgr2Gray);
+
+            //Get rid of noise by going pyramid up and down
+            {
+                UMat tmp = new UMat();
+                CvInvoke.PyrDown(newImage, tmp);
+                CvInvoke.PyrUp(tmp, newImage);
+            }
+
+            double linkingThreshold = 120.0;
+            double cannyThreshold = 180.0;
+            UMat edges = new UMat();
+            CvInvoke.Canny(newImage, edges, cannyThreshold, linkingThreshold);
+
+            res = CvInvoke.HoughLinesP(edges,1, Math.PI / 45.0, 20, 30, 10);
+            return res;
         }
 
         private void Extractor_ProgressChanged(object sender, ProgressChangedEventArgs e)

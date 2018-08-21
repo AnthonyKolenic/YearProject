@@ -26,7 +26,8 @@ namespace YearProject
         ImageListWindow imageList ;
         List<String> inputImageFilenames = new List<string>();
         bool featuresExtractValid = true;
-        Dictionary<String, VectorOfKeyPoint> keypoints;
+        Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> features;
+
 
         public MainWindow()
         {
@@ -42,14 +43,14 @@ namespace YearProject
             inputImageFilenames.AddRange(items);
         }
 
-        public void UpdateFeatureExtractList(Dictionary<String, VectorOfKeyPoint> keypoints)
+        public void UpdateFeatureExtractList(Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> features)
         {
             featuresExtractValid = true;
-            this.keypoints = keypoints;
-            foreach (KeyValuePair<String, VectorOfKeyPoint> entry in keypoints)
+            this.features = features;
+            foreach (var entry in features)
             {
 
-                System.Console.WriteLine("Received : " + entry.Value.Size);
+                System.Console.WriteLine("Received : " + entry.Value.Item1.Size);
                 lstKeypoints.Items.Add(entry.Key);
             }
         }
@@ -67,8 +68,20 @@ namespace YearProject
             using (DrawingContext context = renderer.RenderOpen())
             {
                 context.DrawImage(canvas, new Rect(0, 0, width, height));
+                
+                pen = new Pen(new SolidColorBrush(Color.FromRgb(255, 0, 0)), 1);
                 int counter = 0;
-                foreach (MKeyPoint point in keypoints[filename].ToArray() )
+                foreach (LineSegment2D line in features[filename].Item2.ToArray())
+                {
+                    counter++;
+
+                    context.DrawLine(pen, new System.Windows.Point(line.P1.X, line.P1.Y), new System.Windows.Point(line.P2.X, line.P2.Y));
+                }
+                System.Console.WriteLine("Number of lines drawn: " + counter);
+
+                counter = 0;
+                pen = new Pen(new SolidColorBrush(Color.FromRgb(255, 255, 0)), 1);
+                foreach (MKeyPoint point in features[filename].Item1.ToArray() )
                 {
                     counter++;
                     
@@ -78,6 +91,9 @@ namespace YearProject
                     context.DrawRectangle(null, pen, new Rect(x - 1,y - 1, 3, 3));
                 }
                 System.Console.WriteLine("Number of Points drawn: " + counter);
+
+                
+
             }
 
             RenderTargetBitmap target = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
