@@ -58,7 +58,7 @@ namespace YearProject
             }
             else
             {
-                mainReference.UpdateFeatureExtractList((Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>>)e.Result);
+                mainReference.UpdateFeatureExtractList((Dictionary<String, ImageInfo>)e.Result);
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -70,7 +70,7 @@ namespace YearProject
             List<String> filenames = new List<String>((IEnumerable<String>)e.Argument);
             
             BackgroundWorker worker = sender as BackgroundWorker;
-            Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> result = new Dictionary<string, Tuple<VectorOfKeyPoint, LineSegment2D[]>>();
+            Dictionary<String, ImageInfo> result = new Dictionary<string, ImageInfo>();
             for (int i = 0; i < filenames.Count<String>(); i++)
             {
                 String filename = filenames[i];
@@ -101,13 +101,11 @@ namespace YearProject
                         
                     }
                     //-----------------process file-----------------------
-                    VectorOfKeyPoint keyPoints = extractKeyPoints(img);
-                    LineSegment2D[] lines = extractLines(img);
-
-                    Tuple<VectorOfKeyPoint, LineSegment2D[]> tempStruct = new Tuple<VectorOfKeyPoint, LineSegment2D[]>(keyPoints,lines);
-
-                    System.Console.WriteLine(keyPoints.Size);
-                    result.Add(filename, tempStruct);
+                    ImageInfo temp = new ImageInfo();
+                    temp.KeyPoints = ImageManipulation.extractKeyPoints(img);
+                    temp.Lines = ImageManipulation.extractLines(img);
+                    temp.Contours = ImageManipulation.extractContours(img);
+                    result.Add(filename, temp);
                     //update progress showing another file has been successfully processed
                     worker.ReportProgress(i);
                     
@@ -116,52 +114,7 @@ namespace YearProject
             e.Result = result;
         }
 
-        private VectorOfKeyPoint extractKeyPoints(Mat image)
-        {
-            VectorOfKeyPoint res = new VectorOfKeyPoint();
-            int minHessian = 400;
-            SURF detector = new SURF(minHessian);
-            detector.DetectRaw(image, res);
-            System.Console.WriteLine("Sent : " + res.Size);
-            return res;
-        }
-
-        private UMat getScrubbedImage(Mat image)
-        {
-            UMat res = new UMat();
-            //convert image to grey
-            CvInvoke.CvtColor(image, res, ColorConversion.Bgr2Gray);
-
-            //Get rid of noise by going pyramid up and down
-            {
-                UMat tmp = new UMat();
-                CvInvoke.PyrDown(res, tmp);
-                CvInvoke.PyrUp(tmp, res);
-            }
-            return res;
-        }
-
-        private VectorOfVectorOfPoint getObjectContours(Mat image)
-        {
-            VectorOfVectorOfPoint res = new VectorOfVectorOfPoint();
-            CvInvoke.FindContours(getEdges(image), res, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
-
-            return res;
-        }
-
-        private UMat getEdges(Mat image,double linkThres = 120.0,double cannyThres = 180.0)
-        {
-            UMat res = new UMat();
-            CvInvoke.Canny(getScrubbedImage(image), res, cannyThres, linkThres);
-            return res;
-        }
-
-        private LineSegment2D[] extractLines(Mat image)
-        {
-            LineSegment2D[] res = null;
-            res = CvInvoke.HoughLinesP(getEdges(image), 1, Math.PI / 45.0, 20, 30, 10);
-            return res;
-        }
+       
 
         private void Extractor_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {

@@ -9,7 +9,7 @@ namespace YearProject
     abstract class Shape
     {
         private String _ID;
-        private Point point;
+        private Point _point;
 
         public String ID
         {

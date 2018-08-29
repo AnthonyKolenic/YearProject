@@ -1,4 +1,5 @@
-﻿using Emgu.CV.Structure;
+﻿using Emgu.CV;
+using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace YearProject
         ImageListWindow imageList ;
         List<String> inputImageFilenames = new List<string>();
         bool featuresExtractValid = true;
-        Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> features;
+        Dictionary<String, ImageInfo> features;
 
 
         public MainWindow()
@@ -43,15 +44,13 @@ namespace YearProject
             inputImageFilenames.AddRange(items);
         }
 
-        public void UpdateFeatureExtractList(Dictionary<String, Tuple<VectorOfKeyPoint, LineSegment2D[]>> features)
+        public void UpdateFeatureExtractList(Dictionary<String, ImageInfo> features)
         {
             featuresExtractValid = true;
             this.features = features;
-            foreach (var entry in features)
+            foreach (String key in features.Keys.ToArray<String>())
             {
-
-                System.Console.WriteLine("Received : " + entry.Value.Item1.Size);
-                lstKeypoints.Items.Add(entry.Key);
+                lstKeypoints.Items.Add(key);
             }
         }
 
@@ -61,7 +60,8 @@ namespace YearProject
             BitmapImage canvas = new BitmapImage(new Uri(filename));
             int width = canvas.PixelWidth;
             int height = canvas.PixelHeight;
-
+            /* 
+            //Old drawing methods
             DrawingVisual renderer = new DrawingVisual();
             
             Pen pen = new Pen(new SolidColorBrush(Color.FromRgb(255,255,0)),1);
@@ -71,7 +71,7 @@ namespace YearProject
                 
                 pen = new Pen(new SolidColorBrush(Color.FromRgb(255, 0, 0)), 1);
                 int counter = 0;
-                foreach (LineSegment2D line in features[filename].Item2.ToArray())
+                foreach (LineSegment2D line in features[filename].Lines.ToArray())
                 {
                     counter++;
 
@@ -81,7 +81,7 @@ namespace YearProject
 
                 counter = 0;
                 pen = new Pen(new SolidColorBrush(Color.FromRgb(255, 255, 0)), 1);
-                foreach (MKeyPoint point in features[filename].Item1.ToArray() )
+                foreach (MKeyPoint point in features[filename].KeyPoints.ToArray() )
                 {
                     counter++;
                     
@@ -100,6 +100,25 @@ namespace YearProject
             target.Render(renderer);
 
             imgKeyPoints.Source = target;
+            */
+            Image<Bgr, Byte> img = new Image<Bgr, byte>(filename);
+            foreach (LineSegment2D line in features[filename].Lines)
+                img.Draw(line, new Bgr(0, 0, 255.0), 1);
+
+            CvInvoke.DrawContours(img, features[filename].Contours, -1, new MCvScalar(255, 0, 255));
+
+            using (System.Drawing.Bitmap source = img.Bitmap)
+            {
+                IntPtr pointerToPixels = source.GetHbitmap(); //obtain the Hbitmap
+
+                BitmapSource bitmapSource = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    pointerToPixels,
+                    IntPtr.Zero,
+                    Int32Rect.Empty,
+                    System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+                //TODO (Anthony): memory leak need deleteOpbejct
+                imgKeyPoints.Source = bitmapSource;
+            }
         }
 
         private void ImageList_Clicked(object sender, RoutedEventArgs e)
