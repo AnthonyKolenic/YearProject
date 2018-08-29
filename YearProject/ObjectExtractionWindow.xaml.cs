@@ -26,7 +26,8 @@ namespace YearProject
     /// </summary>
     public partial class FeatureExtractionWindow : Window
     {
-        private BackgroundWorker extractionThread;
+        private BackgroundWorker objectExtractionThread;
+        private BackgroundWorker uniqueIdentifierThread;
         private List<String> Filenames = new List<string>();
         private MainWindow mainReference;
 
@@ -34,19 +35,27 @@ namespace YearProject
         {
             InitializeComponent();
             this.Filenames.AddRange(Filenames);
-            DisplayArea.Text += "\r\n";
-            extractionThread = new BackgroundWorker();
-            extractionThread.WorkerReportsProgress = true;
-            extractionThread.WorkerSupportsCancellation = true;
-            extractionThread.DoWork += new DoWorkEventHandler(Extractor_DoWork);
-            extractionThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Extractor_RunWorkerCompleted);
-            extractionThread.ProgressChanged += new ProgressChangedEventHandler(Extractor_ProgressChanged);
+            DisplayArea.Text += "\r\nExtracting objects:";
 
-            extractionThread.RunWorkerAsync(Filenames);
+            objectExtractionThread = new BackgroundWorker();
+            objectExtractionThread.WorkerReportsProgress = true;
+            objectExtractionThread.WorkerSupportsCancellation = true;
+            objectExtractionThread.DoWork += new DoWorkEventHandler(ObjectExtractor_DoWork);
+            objectExtractionThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(ObjectExtractor_RunWorkerCompleted);
+            objectExtractionThread.ProgressChanged += new ProgressChangedEventHandler(ObjectExtractor_ProgressChanged);
+
+            uniqueIdentifierThread = new BackgroundWorker();
+            uniqueIdentifierThread.WorkerReportsProgress = true;
+            uniqueIdentifierThread.WorkerSupportsCancellation = true;
+            uniqueIdentifierThread.DoWork += new DoWorkEventHandler(UniqueIdentifier_DoWork);
+            uniqueIdentifierThread.RunWorkerCompleted += new RunWorkerCompletedEventHandler(UniqueIdentifier_RunWorkerCompleted);
+            uniqueIdentifierThread.ProgressChanged += new ProgressChangedEventHandler(UniqueIdentifier_ProgressChanged);
+
+            objectExtractionThread.RunWorkerAsync(Filenames);
             mainReference = caller;
         }
 
-        private void Extractor_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void ObjectExtractor_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
             {
@@ -58,19 +67,25 @@ namespace YearProject
             }
             else
             {
-                mainReference.UpdateFeatureExtractList((Dictionary<String, ImageInfo>)e.Result);
+                Dictionary<String, VectorOfVectorOfPoint> fileObjects = (Dictionary<String, VectorOfVectorOfPoint>)e.Result;
+                mainReference.UpdateFeatureExtractList(fileObjects);
+                DisplayArea.Text += "\r\nIdentifying Unique Objects:";
+                VectorOfVectorOfPoint objects = joinObjects(fileObjects);
+                uniqueIdentifierThread.RunWorkerAsync(objects);
+                /*
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                */
             }
             Close();
         }
 
-        private void Extractor_DoWork(object sender, DoWorkEventArgs e)
+        private void ObjectExtractor_DoWork(object sender, DoWorkEventArgs e)
         {
             List<String> filenames = new List<String>((IEnumerable<String>)e.Argument);
             
             BackgroundWorker worker = sender as BackgroundWorker;
-            Dictionary<String, ImageInfo> result = new Dictionary<string, ImageInfo>();
+            Dictionary<String, VectorOfVectorOfPoint> result = new Dictionary<string, VectorOfVectorOfPoint>();
             for (int i = 0; i < filenames.Count<String>(); i++)
             {
                 String filename = filenames[i];
@@ -101,12 +116,8 @@ namespace YearProject
                         
                     }
                     //-----------------process file-----------------------
-                    ImageInfo temp = new ImageInfo();
-                    temp.KeyPoints = ImageManipulation.extractKeyPoints(img);
-                    temp.Lines = ImageManipulation.extractLines(img);
-                    temp.Contours = ImageManipulation.extractContours(img);
-                    result.Add(filename, temp);
-                    //update progress showing another file has been successfully processed
+                    
+                    result.Add(filename, ImageManipulation.extractContours(img));
                     worker.ReportProgress(i);
                     
                 }
@@ -116,14 +127,43 @@ namespace YearProject
 
        
 
-        private void Extractor_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void ObjectExtractor_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             int progress = (int)(((e.ProgressPercentage + 1) / (double)Filenames.Count<String>()) * 100);
             this.ExtractionProgress.Value = progress;
             this.DisplayArea.Text += Filenames[e.ProgressPercentage] + "\r\n";
-            
-            //DisplayArea.Text += filename + "\n";
         }
+
+        private void UniqueIdentifier_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            
+        }
+
+        private void UniqueIdentifier_DoWork(object sender, DoWorkEventArgs e)
+        {
+            
+        }
+
+        private void UniqueIdentifier_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            
+        }
+
+        private VectorOfVectorOfPoint joinObjects(Dictionary<String, VectorOfVectorOfPoint> objects)
+        {
+            VectorOfVectorOfPoint res = new VectorOfVectorOfPoint();
+            //loop over files
+            foreach (String currentFile in objects.Keys)
+            {
+                //loop over objects in image file
+                for (int i = 0; i < objects[currentFile].Size;i++)
+                {
+                    res.Push(objects[currentFile][i]);
+                }
+            }
+            return res;
+        }
+
 
         private void CancelExtraction_Click(object sender, RoutedEventArgs e)
         {
@@ -132,7 +172,7 @@ namespace YearProject
             //if cancel selected stop processing and close window
             if (res == MessageBoxResult.Yes)
             {
-                extractionThread.CancelAsync();
+                objectExtractionThread.CancelAsync();
             }
             
         }

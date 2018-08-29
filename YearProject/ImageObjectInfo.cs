@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace YearProject
 {
-    public class ImageInfo
+    public class ImageObjectInfo
     {
        
 
         public VectorOfKeyPoint KeyPoints { get; set; }
         public LineSegment2D[] Lines { get; set; }
-        public VectorOfVectorOfPoint Contours { get; set; }
+        public VectorOfPoint Contours { get; set; }
     }
 }

@@ -27,7 +27,7 @@ namespace YearProject
         ImageListWindow imageList ;
         List<String> inputImageFilenames = new List<string>();
         bool featuresExtractValid = true;
-        Dictionary<String, ImageInfo> features;
+        Dictionary<String, VectorOfVectorOfPoint> features;
 
 
         public MainWindow()
@@ -44,7 +44,7 @@ namespace YearProject
             inputImageFilenames.AddRange(items);
         }
 
-        public void UpdateFeatureExtractList(Dictionary<String, ImageInfo> features)
+        public void UpdateFeatureExtractList(Dictionary<String, VectorOfVectorOfPoint> features)
         {
             featuresExtractValid = true;
             this.features = features;
@@ -102,10 +102,11 @@ namespace YearProject
             imgKeyPoints.Source = target;
             */
             Image<Bgr, Byte> img = new Image<Bgr, byte>(filename);
+            /*
             foreach (LineSegment2D line in features[filename].Lines)
                 img.Draw(line, new Bgr(0, 0, 255.0), 1);
-
-            CvInvoke.DrawContours(img, features[filename].Contours, -1, new MCvScalar(255, 0, 255));
+            */
+            CvInvoke.DrawContours(img, features[filename], -1, new MCvScalar(255, 0, 255));
 
             using (System.Drawing.Bitmap source = img.Bitmap)
             {
