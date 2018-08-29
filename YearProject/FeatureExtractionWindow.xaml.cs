@@ -126,27 +126,40 @@ namespace YearProject
             return res;
         }
 
-        private LineSegment2D[] extractLines(Mat image)
+        private UMat getScrubbedImage(Mat image)
         {
-            LineSegment2D[] res = null;
-
+            UMat res = new UMat();
             //convert image to grey
-            UMat newImage = new UMat();
-            CvInvoke.CvtColor(image, newImage, ColorConversion.Bgr2Gray);
+            CvInvoke.CvtColor(image, res, ColorConversion.Bgr2Gray);
 
             //Get rid of noise by going pyramid up and down
             {
                 UMat tmp = new UMat();
-                CvInvoke.PyrDown(newImage, tmp);
-                CvInvoke.PyrUp(tmp, newImage);
+                CvInvoke.PyrDown(res, tmp);
+                CvInvoke.PyrUp(tmp, res);
             }
+            return res;
+        }
 
-            double linkingThreshold = 120.0;
-            double cannyThreshold = 180.0;
-            UMat edges = new UMat();
-            CvInvoke.Canny(newImage, edges, cannyThreshold, linkingThreshold);
+        private VectorOfVectorOfPoint getObjectContours(Mat image)
+        {
+            VectorOfVectorOfPoint res = new VectorOfVectorOfPoint();
+            CvInvoke.FindContours(getEdges(image), res, null, RetrType.List, ChainApproxMethod.ChainApproxSimple);
 
-            res = CvInvoke.HoughLinesP(edges,1, Math.PI / 45.0, 20, 30, 10);
+            return res;
+        }
+
+        private UMat getEdges(Mat image,double linkThres = 120.0,double cannyThres = 180.0)
+        {
+            UMat res = new UMat();
+            CvInvoke.Canny(getScrubbedImage(image), res, cannyThres, linkThres);
+            return res;
+        }
+
+        private LineSegment2D[] extractLines(Mat image)
+        {
+            LineSegment2D[] res = null;
+            res = CvInvoke.HoughLinesP(getEdges(image), 1, Math.PI / 45.0, 20, 30, 10);
             return res;
         }
 
