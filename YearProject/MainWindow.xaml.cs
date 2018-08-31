@@ -102,6 +102,7 @@ namespace YearProject
             imgKeyPoints.Source = target;
             */
             Image<Bgr, Byte> img = new Image<Bgr, byte>(filename);
+           
             /*
             foreach (LineSegment2D line in features[filename].Lines)
                 img.Draw(line, new Bgr(0, 0, 255.0), 1);

@@ -30,12 +30,13 @@ namespace YearProject
         private BackgroundWorker uniqueIdentifierThread;
         private List<String> Filenames = new List<string>();
         private MainWindow mainReference;
+        private Boolean running = false;
 
         public FeatureExtractionWindow(IEnumerable<String> Filenames,MainWindow caller)
         {
             InitializeComponent();
             this.Filenames.AddRange(Filenames);
-            DisplayArea.Text += "\r\nExtracting objects:";
+            DisplayArea.Text += "\r\nExtracting objects:\r\n";
 
             objectExtractionThread = new BackgroundWorker();
             objectExtractionThread.WorkerReportsProgress = true;
@@ -52,6 +53,7 @@ namespace YearProject
             uniqueIdentifierThread.ProgressChanged += new ProgressChangedEventHandler(UniqueIdentifier_ProgressChanged);
 
             objectExtractionThread.RunWorkerAsync(Filenames);
+            running = true;
             mainReference = caller;
         }
 
@@ -69,7 +71,7 @@ namespace YearProject
             {
                 Dictionary<String, VectorOfVectorOfPoint> fileObjects = (Dictionary<String, VectorOfVectorOfPoint>)e.Result;
                 mainReference.UpdateFeatureExtractList(fileObjects);
-                DisplayArea.Text += "\r\nIdentifying Unique Objects:";
+                DisplayArea.Text += "\r\nIdentifying Unique Objects:\r\n";
                 VectorOfVectorOfPoint objectContours = joinObjects(fileObjects);
                 uniqueIdentifierThread.RunWorkerAsync(objectContours);
                 /*
@@ -77,7 +79,8 @@ namespace YearProject
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 */
             }
-            Close();
+            
+            //Close();
         }
 
         private void ObjectExtractor_DoWork(object sender, DoWorkEventArgs e)
@@ -136,18 +139,77 @@ namespace YearProject
 
         private void UniqueIdentifier_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            
+            CancelExtraction.Content = "Close";
+            running = false;
         }
 
         private void UniqueIdentifier_DoWork(object sender, DoWorkEventArgs e)
         {
+            BackgroundWorker worker = sender as BackgroundWorker;
             VectorOfVectorOfPoint objectContours = (VectorOfVectorOfPoint)e.Argument;
-            
+            int size = objectContours.Size;
+            int state = 0;
+            worker.ReportProgress(state);
+
+            //Generate a boundbox for each countour
+            BoundBox[] boundBoxes = new BoundBox[size];
+            for (int i = 0; i < size; i++)
+            {
+                boundBoxes[i] = getBoundBox(objectContours[i]);
+            }
+            worker.ReportProgress(++state);
+
+            //Create set of offsetted countours for image generation
+            VectorOfVectorOfPoint offsetObjects = new VectorOfVectorOfPoint(size);
+            for (int i = 0; i < size; i++)
+            {
+                offsetObjects.Push(offsetContour(objectContours[i],boundBoxes[i].TopLeft));
+            }
+            worker.ReportProgress(++state);
+
+            //create images of each of the contours
+            Image<Bgr, Byte>[] images = new Image<Bgr, byte>[size];
+            for (int i = 0; i < size;i++)
+            {
+                BoundBox box = boundBoxes[i];
+                images[i] = new Image<Bgr, byte>(box.Width,box.Height,new Bgr(255,255,255));
+                CvInvoke.DrawContours(images[i], offsetObjects[i], -1, new MCvScalar(0, 0, 0));
+            }
+            worker.ReportProgress(++state);
+
+            //TODO (Anthony): Extract keypoints and compare rest of images
         }
 
         private void UniqueIdentifier_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            
+            switch (e.ProgressPercentage)
+            {
+                case 0:
+                {
+                    this.DisplayArea.Text += "Creating boundboxes\r\n";
+                    break;
+                }
+                case 1:
+                {
+                    this.DisplayArea.Text += "Offsetting objects\r\n";
+                    break;
+                }
+                case 2:
+                {
+                    this.DisplayArea.Text += "Drawing objects for feature extraction\r\n";
+                    break;
+                }
+                case 3:
+                {
+                    this.DisplayArea.Text += "Extracting features from drawn objects\r\n";
+                    break;
+                }
+                default:
+                {
+                    this.DisplayArea.Text += "Unknown State " + e.ProgressPercentage + "\r\n";
+                    break;
+                }
+            }
         }
 
         private VectorOfVectorOfPoint joinObjects(Dictionary<String, VectorOfVectorOfPoint> objects)
@@ -168,14 +230,20 @@ namespace YearProject
 
         private void CancelExtraction_Click(object sender, RoutedEventArgs e)
         {
-            String dialogText = "Are you sure you want to cancel the current feature extraction?";
-            MessageBoxResult res = MessageBox.Show(dialogText, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            //if cancel selected stop processing and close window
-            if (res == MessageBoxResult.Yes)
+            if (running)
             {
-                objectExtractionThread.CancelAsync();
+                String dialogText = "Are you sure you want to cancel the current feature extraction?";
+                MessageBoxResult res = MessageBox.Show(dialogText, "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                //if cancel selected stop processing and close window
+                if (res == MessageBoxResult.Yes)
+                {
+                    objectExtractionThread.CancelAsync();
+                }
             }
-            
+            else
+            {
+                Close();
+            }
         }
 
         /*

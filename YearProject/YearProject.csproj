@@ -82,11 +82,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BoundBox.cs" />
     <Compile Include="ImageObjectInfo.cs" />
     <Compile Include="ImageManipulation.cs" />
-    <Compile Include="Point.cs" />
     <Compile Include="Renderer.cs" />
-    <Compile Include="Shape.cs" />
     <Page Include="ObjectExtractionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
