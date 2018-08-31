@@ -70,8 +70,8 @@ namespace YearProject
                 Dictionary<String, VectorOfVectorOfPoint> fileObjects = (Dictionary<String, VectorOfVectorOfPoint>)e.Result;
                 mainReference.UpdateFeatureExtractList(fileObjects);
                 DisplayArea.Text += "\r\nIdentifying Unique Objects:";
-                VectorOfVectorOfPoint objects = joinObjects(fileObjects);
-                uniqueIdentifierThread.RunWorkerAsync(objects);
+                VectorOfVectorOfPoint objectContours = joinObjects(fileObjects);
+                uniqueIdentifierThread.RunWorkerAsync(objectContours);
                 /*
                 String dialogText = "Task Complete";
                 MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -141,6 +141,7 @@ namespace YearProject
 
         private void UniqueIdentifier_DoWork(object sender, DoWorkEventArgs e)
         {
+            VectorOfVectorOfPoint objectContours = (VectorOfVectorOfPoint)e.Argument;
             
         }
 
@@ -175,6 +176,39 @@ namespace YearProject
                 objectExtractionThread.CancelAsync();
             }
             
+        }
+
+        /*
+         *  Creates bound box that contains all the points 
+         */
+        private BoundBox getBoundBox(VectorOfPoint points)
+        {
+            int smallestX = points[0].X;
+            int smallestY = points[0].Y;
+            int largestX = points[0].X;
+            int largestY = points[0].Y;
+            for (int i = 1; i < points.Size;i++)
+            {
+                if (points[i].X < smallestX) smallestX = points[i].X;
+                if (points[i].Y < smallestY) smallestY = points[i].Y;
+                if (points[i].X > largestX) largestX = points[i].X;
+                if (points[i].Y > largestY) largestY = points[i].Y;
+            }
+            BoundBox res = new BoundBox(smallestX,smallestY,largestX,largestY);
+            return res;
+        }
+
+        /*
+         *  Offset contour by a point
+         */
+        private VectorOfPoint offsetContour(VectorOfPoint contour, System.Drawing.Point offset)
+        {
+            System.Drawing.Point[] points = new System.Drawing.Point[contour.Size];
+            for (int i = 0; i < contour.Size;i++)
+            {
+                points[i] = new System.Drawing.Point(contour[i].X - offset.X, contour[i].Y - offset.Y);
+            }
+            return new VectorOfPoint(points);
         }
     }
 }
