@@ -141,6 +141,25 @@ namespace YearProject
         {
             CancelExtraction.Content = "Close";
             running = false;
+            if (e.Error != null)
+            {
+                MessageBox.Show(e.Error.Message);
+
+            }
+            else if (e.Cancelled)
+            {
+            }
+            else
+            {
+                 VectorOfVectorOfPoint contours = (VectorOfVectorOfPoint)e.Result;
+                mainReference.setObjects(contours);
+                
+                /*
+                String dialogText = "Task Complete";
+                MessageBox.Show(dialogText, "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                */
+            }
+            
         }
 
         private void UniqueIdentifier_DoWork(object sender, DoWorkEventArgs e)
@@ -176,7 +195,7 @@ namespace YearProject
                 CvInvoke.DrawContours(images[i], offsetObjects[i], -1, new MCvScalar(0, 0, 0));
             }
             worker.ReportProgress(++state);
-
+            e.Result = objectContours;
             //TODO (Anthony): Extract keypoints and compare rest of images
         }
 

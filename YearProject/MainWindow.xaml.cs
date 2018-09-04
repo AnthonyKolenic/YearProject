@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+//Geoff
+
 namespace YearProject
 {
     /// <summary>
@@ -28,6 +30,7 @@ namespace YearProject
         List<String> inputImageFilenames = new List<string>();
         bool featuresExtractValid = true;
         Dictionary<String, VectorOfVectorOfPoint> features;
+        VectorOfVectorOfPoint contours; 
 
 
         public MainWindow()
@@ -160,10 +163,87 @@ namespace YearProject
             }
         }
 
+        
+        private void GenerateImage_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (contours == null) return;
+            int numObjects = contours.Size;
+            if (numObjects > 0)
+            {
+                int numOfSceneObjects = 5;
+                int numClones = 10;
+                int numIterations = 10;
+                VectorOfPoint[] objects = new VectorOfPoint[numOfSceneObjects];
+                Random rand = new Random();
+                for (int i = 0; i < numOfSceneObjects;i++)
+                {
+                    int objectIndex = rand.Next(contours.Size);
+                    objects[i] = offsetContour(contours[objectIndex],new System.Drawing.Point(rand.Next(300), rand.Next(300)));
+                }
+
+
+                VectorOfPoint[][] clones = new VectorOfPoint[numClones][];
+                GaussianRandom gRand = new GaussianRandom();
+                for (int i = 0;i < numClones;i++)
+                {
+                    clones[i] = objects;
+                }
+                for (int z = 0; z < numIterations; z++)
+                {
+                    for (int i = 0; i < numClones; i++) // for each clone
+                    {
+                        //mutate clone
+
+                        for (int k = 0; k < clones[i].Length; k++) // for each scene object
+                        {
+                            int numMutatePoint = rand.Next((int)(clones[i][k].Size * 0.1)); // only mutate 10% of points
+                            for (int f = 0; f < numMutatePoint; f++)
+                            {
+                                clones[i][k][f].Offset((int)(gRand.NextValue() * 10), (int)(gRand.NextValue() * 10));
+                            }
+                        }
+                        //set clone to a copy of the selected
+                        int selClone = rand.Next(numClones);
+                        for (int k = 0; k < numClones; k++)
+                        {
+                            clones[k] = clones[selClone];
+                        }
+                    }
+                }
+                //TODO (Anthony): Allow different size images
+                Image < Bgr, byte> img= new Image<Bgr, byte>(300, 300, new Bgr(255, 255, 255));
+                CvInvoke.DrawContours(img, new VectorOfVectorOfPoint(clones[rand.Next(numClones)]), -1, new MCvScalar(0, 0, 0));
+                ImageDisplayWindow displayWindow = new ImageDisplayWindow(img);
+                displayWindow.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("There are no extracted objects", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             imageList.ForceClose();
 
+        }
+
+        public void setObjects(VectorOfVectorOfPoint contours)
+        {
+            this.contours = contours;  
+        }
+
+        /*
+         *  Offset contour by a point
+         */
+        private VectorOfPoint offsetContour(VectorOfPoint contour, System.Drawing.Point offset)
+        {
+            System.Drawing.Point[] points = new System.Drawing.Point[contour.Size];
+            for (int i = 0; i < contour.Size; i++)
+            {
+                points[i] = new System.Drawing.Point(contour[i].X - offset.X, contour[i].Y - offset.Y);
+            }
+            return new VectorOfPoint(points);
         }
     }
 }

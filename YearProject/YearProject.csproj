@@ -82,10 +82,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ImageDisplayWindow.xaml.cs">
+      <DependentUpon>ImageDisplayWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="BoundBox.cs" />
+    <Compile Include="GaussianRandom.cs" />
     <Compile Include="ImageObjectInfo.cs" />
     <Compile Include="ImageManipulation.cs" />
     <Compile Include="Renderer.cs" />
+    <Page Include="ImageDisplayWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ObjectExtractionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

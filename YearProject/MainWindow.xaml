@@ -21,6 +21,7 @@
                 </MenuItem>
                 <MenuItem Header="_Tools">
                     <MenuItem Header="_Extract Features" Click="ExtractFeatures_Clicked" />
+                    <MenuItem Header="_Generate Image" Click="GenerateImage_Clicked" />
                 </MenuItem>
             </Menu>
 
