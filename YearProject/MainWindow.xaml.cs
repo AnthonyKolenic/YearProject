@@ -166,11 +166,15 @@ namespace YearProject
         
         private void GenerateImage_Clicked(object sender, RoutedEventArgs e)
         {
-            if (contours == null) return;
-            int numObjects = contours.Size;
-            if (numObjects > 0)
+            if (contours == null || contours.Size == 0)
             {
-                int numOfSceneObjects = 5;
+                MessageBox.Show("No objects have been extracted", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            SettingsWindow settingsWIndow = new SettingsWindow();
+            settingsWIndow.ShowDialog();
+            /*
+                int numOfSceneObjects = 15;
                 int numClones = 10;
                 int numIterations = 10;
                 VectorOfPoint[] objects = new VectorOfPoint[numOfSceneObjects];
@@ -196,7 +200,8 @@ namespace YearProject
 
                         for (int k = 0; k < clones[i].Length; k++) // for each scene object
                         {
-                            int numMutatePoint = rand.Next((int)(clones[i][k].Size * 0.1)); // only mutate 10% of points
+                            int numMutatePoint = clones[i][k].Size;// rand.Next((int)(clones[i][k].Size * 0.1)); // only mutate 10% of points
+                            System.Console.WriteLine(numMutatePoint);
                             for (int f = 0; f < numMutatePoint; f++)
                             {
                                 clones[i][k][f].Offset((int)(gRand.NextValue() * 10), (int)(gRand.NextValue() * 10));
@@ -215,11 +220,7 @@ namespace YearProject
                 CvInvoke.DrawContours(img, new VectorOfVectorOfPoint(clones[rand.Next(numClones)]), -1, new MCvScalar(0, 0, 0));
                 ImageDisplayWindow displayWindow = new ImageDisplayWindow(img);
                 displayWindow.ShowDialog();
-            }
-            else
-            {
-                MessageBox.Show("There are no extracted objects", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            */
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)

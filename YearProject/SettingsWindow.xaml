@@ -1,0 +1,43 @@
+﻿<Window x:Class="YearProject.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:YearProject"
+        mc:Ignorable="d"
+        Title="Settings" Width="400" Height="280">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label Content="Number of Negative detectors:" Grid.Row="0" Grid.Column="0"/>
+        <TextBox Name="txtNumNegative" Grid.Row="0" Grid.Column="1" Margin="4,4,4,4"/>
+        <Label Content="Number of Positive detectors:" Grid.Row="1" Grid.Column="0"/>
+        <TextBox Name="txtNumPositive" Grid.Row="1" Grid.Column="1" Margin="4,4,4,4"/>
+        
+        <Label Content="Placeholder:" Grid.Row="2" Grid.Column="0"/>
+        <TextBox Name="txtPlaceA" Grid.Row="2" Grid.Column="1" Margin="4,4,4,4"/>
+        <Label Content="PlaceHolder:" Grid.Row="3" Grid.Column="0"/>
+        <TextBox Name="txtPlaceB" Grid.Row="3" Grid.Column="1" Margin="4,4,4,4"/>
+        
+        <Label Content="Width:" Grid.Row="4" Grid.Column="0"/>
+        <TextBox Name="txtWidth" Grid.Row="4" Grid.Column="1" Margin="4,4,4,4"/>
+        <Label Content="Height:" Grid.Row="5" Grid.Column="0"/>
+        <TextBox Name="txtHeight" Grid.Row="5" Grid.Column="1" Margin="4,4,4,4"/>
+        <Label Content="Seed:" Grid.Row="6" Grid.Column="0"/>
+        <TextBox Name="txtSeed" Grid.Row="6" Grid.Column="1" Margin="4,4,4,4" />
+        <Button Content="Start" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100" Margin="0,0,4,0" Click="StartGeneration_Click"/>
+    </Grid>
+</Window>
