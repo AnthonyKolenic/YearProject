@@ -44,6 +44,39 @@ namespace YearProject
             return res;
         }
 
+        /*
+         *  Creates bound box that contains all the points 
+         */
+        public static BoundBox getBoundBox(VectorOfPoint points)
+        {
+            int smallestX = points[0].X;
+            int smallestY = points[0].Y;
+            int largestX = points[0].X;
+            int largestY = points[0].Y;
+            for (int i = 1; i < points.Size; i++)
+            {
+                if (points[i].X < smallestX) smallestX = points[i].X;
+                if (points[i].Y < smallestY) smallestY = points[i].Y;
+                if (points[i].X > largestX) largestX = points[i].X;
+                if (points[i].Y > largestY) largestY = points[i].Y;
+            }
+            BoundBox res = new BoundBox(smallestX, smallestY, largestX, largestY);
+            return res;
+        }
+
+        /*
+         *  Offset contour by a point
+         */
+        public static VectorOfPoint offsetContour(VectorOfPoint contour, System.Drawing.Point offset)
+        {
+            System.Drawing.Point[] points = new System.Drawing.Point[contour.Size];
+            for (int i = 0; i < contour.Size; i++)
+            {
+                points[i] = new System.Drawing.Point(contour[i].X - offset.X, contour[i].Y - offset.Y);
+            }
+            return new VectorOfPoint(points);
+        }
+
         private static UMat getScrubbedImage(Mat image)
         {
             UMat res = new UMat();
@@ -65,6 +98,8 @@ namespace YearProject
             CvInvoke.Canny(getScrubbedImage(image), res, cannyThres, linkThres);
             return res;
         }
+
+        
 
     }
 }

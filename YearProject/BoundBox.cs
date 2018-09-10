@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace YearProject
 {
-    class BoundBox
+    public class BoundBox
     {
         public Point TopLeft { get; set; }
         public Point BottomRight { get; set; }

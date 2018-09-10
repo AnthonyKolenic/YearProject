@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-//Geoff
+//Jeff
 
 namespace YearProject
 {
@@ -234,17 +234,6 @@ namespace YearProject
             this.contours = contours;  
         }
 
-        /*
-         *  Offset contour by a point
-         */
-        private VectorOfPoint offsetContour(VectorOfPoint contour, System.Drawing.Point offset)
-        {
-            System.Drawing.Point[] points = new System.Drawing.Point[contour.Size];
-            for (int i = 0; i < contour.Size; i++)
-            {
-                points[i] = new System.Drawing.Point(contour[i].X - offset.X, contour[i].Y - offset.Y);
-            }
-            return new VectorOfPoint(points);
-        }
+       
     }
 }
