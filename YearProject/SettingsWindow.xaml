@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:YearProject"
         mc:Ignorable="d"
-        Title="Settings" Width="400" Height="280">
+        Title="Settings" Width="400" Height="310">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
@@ -36,8 +37,10 @@
         <TextBox Text="200" Name="txtWidth" Grid.Row="4" Grid.Column="1" Margin="4,4,4,4"/>
         <Label Content="Height:" Grid.Row="5" Grid.Column="0"/>
         <TextBox Text="200" Name="txtHeight" Grid.Row="5" Grid.Column="1" Margin="4,4,4,4"/>
-        <Label Content="Seed:" Grid.Row="6" Grid.Column="0"/>
-        <TextBox Text="Cheese" Name="txtSeed" Grid.Row="6" Grid.Column="1" Margin="4,4,4,4" />
-        <Button Content="Start" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100" Margin="0,0,4,0" Click="StartGeneration_Click"/>
+        <Label Content="Number of objects in Scene:" Grid.Row="6" Grid.Column="0"/>
+        <TextBox Text="30" Name="txtNumObj" Grid.Row="6" Grid.Column="1" Margin="4,4,4,4"/>
+        <Label Content="Seed:" Grid.Row="7" Grid.Column="0"/>
+        <TextBox Text="Cheese" Name="txtSeed" Grid.Row="7" Grid.Column="1" Margin="4,4,4,4" />
+        <Button Content="Start" Grid.Row="8" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" MinWidth="100" Margin="0,0,4,0" Click="StartGeneration_Click"/>
     </Grid>
 </Window>

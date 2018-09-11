@@ -19,7 +19,7 @@ namespace YearProject
     /// </summary>
     public partial class GenerationWindow : Window
     {
-        public GenerationWindow(Settings settings)
+        public GenerationWindow(Settings settings, Emgu.CV.Util.VectorOfVectorOfPoint contours)
         {
             InitializeComponent();
         }

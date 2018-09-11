@@ -19,9 +19,12 @@ namespace YearProject
     /// </summary>
     public partial class SettingsWindow : Window
     {
-        public SettingsWindow()
+        Emgu.CV.Util.VectorOfVectorOfPoint contours;
+
+        public SettingsWindow(Emgu.CV.Util.VectorOfVectorOfPoint contours)
         {
             InitializeComponent();
+            this.contours = contours;
         }
         
         private void StartGeneration_Click(object sender, RoutedEventArgs e)
@@ -79,6 +82,14 @@ namespace YearProject
             }
             holder.Height = tmp;
 
+            inputText = txtNumObj.Text;
+            if (!Int32.TryParse(inputText, out tmp))
+            {
+                MessageBoxResult res = MessageBox.Show(inputText + " is not a valid integer value", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            holder.NumberOfObjects = tmp;
+
             inputText = txtSeed.Text;
             if (!Int32.TryParse(inputText, out tmp))
             {
@@ -88,7 +99,7 @@ namespace YearProject
             System.Console.WriteLine("Na Na Na Na");
             Close();
             System.Console.WriteLine("Batman");
-            GenerationWindow genWindow = new GenerationWindow(holder);
+            GenerationWindow genWindow = new GenerationWindow(holder,contours);
             genWindow.ShowDialog();
         }
 

@@ -82,6 +82,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ArtGenerator.cs" />
     <Compile Include="GenrationWindow.xaml.cs">
       <DependentUpon>GenrationWindow.xaml</DependentUpon>
     </Compile>

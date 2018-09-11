@@ -171,7 +171,7 @@ namespace YearProject
                 MessageBox.Show("No objects have been extracted", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            SettingsWindow settingsWIndow = new SettingsWindow();
+            SettingsWindow settingsWIndow = new SettingsWindow(contours);
             settingsWIndow.ShowDialog();
             /*
                 int numOfSceneObjects = 15;
@@ -234,6 +234,7 @@ namespace YearProject
             this.contours = contours;  
         }
 
-       
+        
+
     }
 }
