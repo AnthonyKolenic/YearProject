@@ -20,11 +20,13 @@ namespace YearProject
     public partial class SettingsWindow : Window
     {
         Emgu.CV.Util.VectorOfVectorOfPoint contours;
+        Dictionary<String, Emgu.CV.Util.VectorOfVectorOfPoint> features;
 
-        public SettingsWindow(Emgu.CV.Util.VectorOfVectorOfPoint contours)
+        public SettingsWindow(Emgu.CV.Util.VectorOfVectorOfPoint contours, Dictionary<String, Emgu.CV.Util.VectorOfVectorOfPoint> features)
         {
             InitializeComponent();
             this.contours = contours;
+            this.features = features;
         }
         
         private void StartGeneration_Click(object sender, RoutedEventArgs e)
@@ -96,9 +98,7 @@ namespace YearProject
                 tmp = (inputText.Equals("")) ? (int)DateTime.Now.Ticks : inputText.GetHashCode();
             }
             holder.Seed = tmp;
-            System.Console.WriteLine("Na Na Na Na");
             Close();
-            System.Console.WriteLine("Batman");
             GenerationWindow genWindow = new GenerationWindow(holder,contours);
             genWindow.ShowDialog();
         }
