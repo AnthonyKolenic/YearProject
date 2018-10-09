@@ -83,6 +83,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ArtGenerator.cs" />
+    <Compile Include="Detector.cs" />
     <Compile Include="GenrationWindow.xaml.cs">
       <DependentUpon>GenrationWindow.xaml</DependentUpon>
     </Compile>
