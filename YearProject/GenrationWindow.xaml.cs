@@ -151,7 +151,7 @@ namespace YearProject
                 sizes[i] = ImageManipulation.getBoundBox(data.objects[i]);
             }
 
-            //TODO (Anthony): Setting for number of image CLones  
+             
             int numImagesClones = 20;
             //list of integer and vector of vector of points, where int is the affinities and VectorOfVectorOfPoint is each objects in scene
             List<Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>> imagesObjects = new List<Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>>();
@@ -170,11 +170,49 @@ namespace YearProject
                 imagesObjects.Add(new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity,new Emgu.CV.Util.VectorOfVectorOfPoint(objects)));
             }
 
+            int maxIterations = 20;
+            int loopCounter = 0;
+            bool perfected = false;
+            while (loopCounter < maxIterations && !perfected)
+            {
+                loopCounter++;
+                //calculate affinities
+                for (int i = 0; i < numImagesClones; i++) // loop through each clone
+                {
+                    int affinity = 0;
+                    //TODO (Anthony): Check affinities for all images 
+                    for (int k =0; k < imagesObjects[i].Item2.Size;k++) // loop through each object
+                    {
+                        for (int f = 0; f < imagesObjects[i].Item2[k].Size; f++) // loop through each point
+                        {
+                            foreach (Detector[] detectorsOfEachImage in detectors.Values)
+                            {
+                                for (int c = 0; c < detectorsOfEachImage.Length; c++)
+                                    affinity += checkDistance(detectorsOfEachImage[c], imagesObjects[i].Item2[k][f]);
+                            }
+                        }
+                    }
+                    imagesObjects[i] = new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity, imagesObjects[i].Item2);
+
+                    //mutate according to affinity
+
+                    //replace bad ones
+                }
+
+            }
+
             e.Result = imagesObjects[randomGen.Next(numImagesClones)].Item2;
 
         }
 
-
+        private int checkDistance(Detector detector,System.Drawing.Point point)
+        {
+            double distance = Math.Pow(detector.Location.X - point.X, 2) + Math.Pow(detector.Location.Y - point.Y, 2);
+            if (distance > detector.Radius * detector.Radius)
+                return 0;
+            else
+                return (int)((1.0 - (Math.Sqrt(distance) / detector.Radius)) * detector.Radius);
+        }
 
         private void Generator_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
