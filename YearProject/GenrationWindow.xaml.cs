@@ -170,7 +170,7 @@ namespace YearProject
                 imagesObjects.Add(new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity,new Emgu.CV.Util.VectorOfVectorOfPoint(objects)));
             }
 
-            int maxIterations = 20;
+            int maxIterations = 5;
             int loopCounter = 0;
             bool perfected = false;
             while (loopCounter < maxIterations && !perfected)
@@ -192,12 +192,25 @@ namespace YearProject
                             }
                         }
                     }
-                    imagesObjects[i] = new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity, imagesObjects[i].Item2);
-
-                    //mutate according to affinity
-
-                    //replace bad ones
+                    imagesObjects[i] = new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity, imagesObjects[i].Item2);  
                 }
+                //mutate according to affinity
+                for (int i = 0; i < numImagesClones; i++) // loop through each clone
+                {
+                    int affinity = imagesObjects[i].Item1;
+                    //TODO (Anthony): Check affinities for all images 
+                    for (int k = 0; k < imagesObjects[i].Item2.Size; k++) // loop through each object
+                    {
+                        for (int f = 0; f < imagesObjects[i].Item2[k].Size; f++) // loop through each point
+                        {
+                            int x = (int)(gausRandomGen.NextValue() * affinity);
+                            int y = (int)(gausRandomGen.NextValue() * affinity);
+                            imagesObjects[i].Item2[k][f].Offset(x, y);
+                        }
+                    }
+                   
+                }
+                //replace bad ones
 
             }
 
