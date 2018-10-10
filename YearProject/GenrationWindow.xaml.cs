@@ -28,6 +28,7 @@ namespace YearProject
         }
 
         private BackgroundWorker generatorThread;
+        private DataPass information;
         public GenerationWindow(Settings settings, Emgu.CV.Util.VectorOfVectorOfPoint contours,Dictionary<String, Emgu.CV.Util.VectorOfVectorOfPoint> features)
         {
             InitializeComponent();
@@ -43,13 +44,14 @@ namespace YearProject
                 objects = contours,
                 inputData = features
             };
+            information = tmp;
             generatorThread.RunWorkerAsync(tmp);
 
         }
 
         private void CancelExtraction_Click(object sender, RoutedEventArgs e)
         {
-            
+            generatorThread.CancelAsync();
         }
 
         private void Generator_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -64,7 +66,12 @@ namespace YearProject
             }
             else
             {
-                
+                Emgu.CV.Util.VectorOfVectorOfPoint temp = (Emgu.CV.Util.VectorOfVectorOfPoint)e.Result;
+                Emgu.CV.Image<Emgu.CV.Structure.Bgr, byte> img = new Emgu.CV.Image<Emgu.CV.Structure.Bgr, byte>(information.settings.Width, information.settings.Height, new Emgu.CV.Structure.Bgr(255, 255, 255));
+                Emgu.CV.CvInvoke.DrawContours(img,temp, -1, new Emgu.CV.Structure.MCvScalar(0, 0, 0));
+                ImageDisplayWindow displayWindow = new ImageDisplayWindow(img);
+                displayWindow.ShowDialog();
+                Close();
             }
         }
 
@@ -141,7 +148,7 @@ namespace YearProject
             BoundBox[] sizes = new BoundBox[data.objects.Size];
             for (int i = 0; i < sizes.Length;i++)
             {
-                sizes[0] = ImageManipulation.getBoundBox(data.objects[i]);
+                sizes[i] = ImageManipulation.getBoundBox(data.objects[i]);
             }
 
             //TODO (Anthony): Setting for number of image CLones  
@@ -162,9 +169,8 @@ namespace YearProject
                 }
                 imagesObjects.Add(new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity,new Emgu.CV.Util.VectorOfVectorOfPoint(objects)));
             }
-            
 
-
+            e.Result = imagesObjects[randomGen.Next(numImagesClones)].Item2;
 
         }
 
@@ -172,7 +178,7 @@ namespace YearProject
 
         private void Generator_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            generatorThread.CancelAsync();
+            
         }
 
     }

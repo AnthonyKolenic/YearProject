@@ -151,7 +151,7 @@ namespace YearProject
             }
             else
             {
-                 VectorOfVectorOfPoint contours = (VectorOfVectorOfPoint)e.Result;
+                VectorOfVectorOfPoint contours = (VectorOfVectorOfPoint)e.Result;
                 mainReference.setObjects(contours);
                 
                 /*
