@@ -99,7 +99,7 @@ namespace YearProject
             }
             holder.Seed = tmp;
             Close();
-            GenerationWindow genWindow = new GenerationWindow(holder,contours);
+            GenerationWindow genWindow = new GenerationWindow(holder,contours,features);
             genWindow.ShowDialog();
         }
 

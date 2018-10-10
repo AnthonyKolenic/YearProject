@@ -129,15 +129,50 @@ namespace YearProject
                     }
                 }
             }
+
+            //start generation and mutation
+
+            //Step 1: generate initial
+            //Step 2: mutate according to affinities
+            //Step 3: calculate affinities
+            //Step 4: Select best
+            //Step 5: go to step 2 and repeat
+
+            BoundBox[] sizes = new BoundBox[data.objects.Size];
+            for (int i = 0; i < sizes.Length;i++)
+            {
+                sizes[0] = ImageManipulation.getBoundBox(data.objects[i]);
+            }
+
+            //TODO (Anthony): Setting for number of image CLones  
+            int numImagesClones = 20;
+            //list of integer and vector of vector of points, where int is the affinities and VectorOfVectorOfPoint is each objects in scene
+            List<Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>> imagesObjects = new List<Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>>();
+            Emgu.CV.Util.VectorOfPoint[] objects = new Emgu.CV.Util.VectorOfPoint[data.settings.NumberOfObjects];
+            for (int k = 0; k < numImagesClones;k++)
+            {
+                //generate image with affinity of zero
+                int affinity = 0;
+                for (int i = 0; i < data.settings.NumberOfObjects; i++)
+                {
+                    int objectIndex = randomGen.Next(data.objects.Size);
+                    int shiftX = Math.Max(0, data.settings.Width - sizes[objectIndex].Width);
+                    int shiftY = Math.Max(0, data.settings.Height - sizes[objectIndex].Height);
+                    objects[i] = ImageManipulation.offsetContour(data.objects[objectIndex], new System.Drawing.Point(randomGen.Next(shiftX), randomGen.Next(shiftY)));
+                }
+                imagesObjects.Add(new Tuple<int, Emgu.CV.Util.VectorOfVectorOfPoint>(affinity,new Emgu.CV.Util.VectorOfVectorOfPoint(objects)));
+            }
             
-            
+
+
+
         }
 
 
 
         private void Generator_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            
+            generatorThread.CancelAsync();
         }
 
     }
